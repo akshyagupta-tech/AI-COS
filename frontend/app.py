@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-API_URL = os.getenv("AI_COS_API_URL", "http://127.0.0.1:8000/api/v1").rstrip("/")
+API_URL = os.getenv("AI_COS_API_URL", "https://ai-cos-backend.onrender.com/api/v1").rstrip("/")
 
 st.markdown(
     """
