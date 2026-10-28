@@ -1,22 +1,54 @@
 import heapq
+import json
 import math
 from collections import defaultdict, deque
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 
+from backend.database import get_connection
+
 router = APIRouter(prefix="/student-life", tags=["Student Life"])
 
-MESS_HISTORY = [
-    {"day": f"Day {day:02d}", "dinner_diners": diners, "scheduled_sections": sections}
-    for day, (diners, sections) in enumerate(
-        [
-            (412, 18), (438, 19), (425, 18), (461, 20), (449, 19), (476, 21), (462, 20),
-            (488, 22), (470, 20), (501, 22), (493, 21), (516, 23), (505, 22), (527, 24),
-        ],
-        start=1,
-    )
-]
+
+def _load_mess_history() -> list[dict[str, Any]]:
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT day, dinner_diners, scheduled_sections FROM student_life_history ORDER BY rowid"
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _load_roommates() -> dict[str, dict[str, Any]]:
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT student_id, name, preferences, profile, group_name FROM roommate_profiles"
+        ).fetchall()
+    roommates: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        roommates[row["student_id"]] = {
+            "name": row["name"],
+            "preferences": tuple(json.loads(row["preferences"])),
+            "profile": tuple(json.loads(row["profile"])),
+            "group": row["group_name"],
+        }
+    return roommates
+
+
+def _load_amenity_requests() -> list[dict[str, Any]]:
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT request_id, amenity, resident, hall, priority, slot, arrival FROM amenity_requests ORDER BY rowid"
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _load_cafeteria_menu() -> list[dict[str, Any]]:
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT item, regular_price FROM cafeteria_menu ORDER BY rowid"
+        ).fetchall()
+    return [dict(row) for row in rows]
 
 
 @router.get("/mess/forecast")
@@ -24,7 +56,8 @@ def forecast_mess_demand(
     scheduled_sections: int = Query(default=22, ge=0, le=60),
     window: int = Query(default=7, ge=3, le=14),
 ) -> dict[str, Any]:
-    recent = MESS_HISTORY[-window:]
+    history = _load_mess_history()
+    recent = history[-window:]
     section_adjusted_rates = [
         item["dinner_diners"] / max(item["scheduled_sections"], 1)
         for item in recent
@@ -33,7 +66,7 @@ def forecast_mess_demand(
     diners_per_section = sum(section_adjusted_rates) / len(section_adjusted_rates)
     predicted_diners = round(diners_per_section * scheduled_sections)
     forecast = [
-        *MESS_HISTORY,
+        *history,
         {
             "day": "Forecast",
             "dinner_diners": predicted_diners,
@@ -52,16 +85,6 @@ def forecast_mess_demand(
 
 
 ROOMMATE_FEATURES = ("quiet", "cleanliness", "sleep_schedule", "social", "study_style")
-ROOMMATES = {
-    "STU-601": {"name": "Aanya", "preferences": (5, 5, 4, 2, 5), "profile": (5, 4, 5, 2, 5), "group": "North"},
-    "STU-602": {"name": "Rohan", "preferences": (2, 3, 2, 5, 2), "profile": (2, 3, 2, 5, 2), "group": "North"},
-    "STU-603": {"name": "Meera", "preferences": (4, 4, 5, 3, 4), "profile": (4, 5, 4, 3, 4), "group": "North"},
-    "STU-604": {"name": "Kabir", "preferences": (3, 2, 3, 4, 3), "profile": (3, 2, 3, 4, 2), "group": "North"},
-    "STU-605": {"name": "Ira", "preferences": (5, 4, 5, 2, 5), "profile": (5, 5, 4, 2, 5), "group": "South"},
-    "STU-606": {"name": "Dev", "preferences": (2, 3, 2, 5, 2), "profile": (2, 3, 2, 4, 2), "group": "South"},
-    "STU-607": {"name": "Tara", "preferences": (4, 5, 4, 3, 4), "profile": (4, 4, 5, 3, 4), "group": "South"},
-    "STU-608": {"name": "Neil", "preferences": (3, 2, 3, 4, 3), "profile": (3, 2, 2, 5, 3), "group": "South"},
-}
 
 
 def _roommate_score(preferences: tuple[int, ...], profile: tuple[int, ...]) -> float:
@@ -71,8 +94,12 @@ def _roommate_score(preferences: tuple[int, ...], profile: tuple[int, ...]) -> f
 
 @router.get("/roommates/matches")
 def create_roommate_matches() -> dict[str, Any]:
-    proposers = sorted(student_id for student_id, student in ROOMMATES.items() if student["group"] == "North")
-    receivers = sorted(student_id for student_id, student in ROOMMATES.items() if student["group"] == "South")
+    roommates = _load_roommates()
+    if not roommates:
+        raise HTTPException(status_code=404, detail="Roommate data is not available yet.")
+
+    proposers = sorted(student_id for student_id, student in roommates.items() if student["group"] == "North")
+    receivers = sorted(student_id for student_id, student in roommates.items() if student["group"] == "South")
     if len(proposers) != len(receivers):
         raise HTTPException(status_code=409, detail="Gale-Shapley matching requires equally sized student groups.")
 
@@ -80,7 +107,7 @@ def create_roommate_matches() -> dict[str, Any]:
         proposer: sorted(
             receivers,
             key=lambda receiver: (
-                -_roommate_score(ROOMMATES[proposer]["preferences"], ROOMMATES[receiver]["profile"]),
+                -_roommate_score(roommates[proposer]["preferences"], roommates[receiver]["profile"]),
                 receiver,
             ),
         )
@@ -93,7 +120,7 @@ def create_roommate_matches() -> dict[str, Any]:
                 sorted(
                     proposers,
                     key=lambda proposer: (
-                        -_roommate_score(ROOMMATES[receiver]["preferences"], ROOMMATES[proposer]["profile"]),
+                        -_roommate_score(roommates[receiver]["preferences"], roommates[proposer]["profile"]),
                         proposer,
                     ),
                 )
@@ -121,7 +148,7 @@ def create_roommate_matches() -> dict[str, Any]:
 
     pairings = []
     for receiver, proposer in sorted(engaged.items()):
-        first, second = ROOMMATES[proposer], ROOMMATES[receiver]
+        first, second = roommates[proposer], roommates[receiver]
         pairings.append(
             {
                 "student_a_id": proposer,
@@ -148,16 +175,6 @@ def create_roommate_matches() -> dict[str, Any]:
     }
 
 
-AMENITY_REQUESTS = [
-    {"request_id": "AM-101", "amenity": "washing_machine", "resident": "H-A101", "hall": "A", "priority": 2, "slot": "07:00", "arrival": 1},
-    {"request_id": "AM-102", "amenity": "washing_machine", "resident": "H-B204", "hall": "B", "priority": 2, "slot": "07:00", "arrival": 2},
-    {"request_id": "AM-103", "amenity": "washing_machine", "resident": "H-C310", "hall": "C", "priority": 1, "slot": "07:00", "arrival": 3},
-    {"request_id": "AM-104", "amenity": "washing_machine", "resident": "H-A119", "hall": "A", "priority": 2, "slot": "07:00", "arrival": 4},
-    {"request_id": "AM-105", "amenity": "washing_machine", "resident": "H-D021", "hall": "D", "priority": 1, "slot": "07:00", "arrival": 5},
-    {"request_id": "AM-201", "amenity": "sports_court", "resident": "H-B101", "hall": "B", "priority": 2, "slot": "17:00", "arrival": 1},
-    {"request_id": "AM-202", "amenity": "sports_court", "resident": "H-C118", "hall": "C", "priority": 1, "slot": "17:00", "arrival": 2},
-    {"request_id": "AM-203", "amenity": "sports_court", "resident": "H-A208", "hall": "A", "priority": 2, "slot": "17:00", "arrival": 3},
-]
 AMENITY_CAPACITY = {"washing_machine": 2, "sports_court": 2}
 
 
@@ -165,7 +182,7 @@ AMENITY_CAPACITY = {"washing_machine": 2, "sports_court": 2}
 def schedule_amenities(
     amenity: str = Query(default="washing_machine", pattern="^(washing_machine|sports_court)$"),
 ) -> dict[str, Any]:
-    requests = [item for item in AMENITY_REQUESTS if item["amenity"] == amenity]
+    requests = [item for item in _load_amenity_requests() if item["amenity"] == amenity]
     queues: dict[int, dict[str, deque[dict[str, Any]]]] = defaultdict(lambda: defaultdict(deque))
     for request in requests:
         queues[request["priority"]][request["hall"]].append(request)
@@ -226,14 +243,6 @@ def _erlang_c_wait(arrivals_per_minute: float, service_minutes: float, servers: 
     return wait_minutes, utilization
 
 
-MENU = [
-    {"item": "Veg rice bowl", "regular_price": 90},
-    {"item": "Paneer wrap", "regular_price": 120},
-    {"item": "Chicken meal box", "regular_price": 150},
-    {"item": "Fruit and yogurt cup", "regular_price": 65},
-]
-
-
 @router.get("/cafeteria/queue")
 def calculate_cafeteria_queue(
     arrivals_last_15m: int = Query(default=9, ge=0, le=500),
@@ -250,11 +259,12 @@ def calculate_cafeteria_queue(
         discount_pct, pricing_state = 0, "PEAK_PRICE"
     menu = [
         {
-            **item,
+            "item": item["item"],
+            "regular_price": item["regular_price"],
             "discount_pct": discount_pct,
             "dynamic_price": round(item["regular_price"] * (1 - discount_pct / 100), 2),
         }
-        for item in MENU
+        for item in _load_cafeteria_menu()
     ]
     return {
         "arrivals_last_15m": arrivals_last_15m,

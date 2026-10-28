@@ -16,8 +16,17 @@ def _get_student_life_data(
         response.raise_for_status()
         return response.json()
     except requests.HTTPError as error:
-        detail = error.response.text if error.response is not None else str(error)
-        st.error(f"Student-life service error: {detail}")
+        response = error.response
+        if response is not None and response.status_code == 502:
+            st.warning(
+                "The campus server is currently waking up from sleep mode. "
+                "Please wait 50 seconds and try again."
+            )
+        elif response is not None and "text/html" in response.headers.get("Content-Type", "").lower():
+            st.error("The student-life service returned an unexpected response. Please try again shortly.")
+        else:
+            detail = response.text if response is not None else str(error)
+            st.error(f"Student-life service error: {detail}")
     except requests.RequestException as error:
         st.error(f"Could not reach the AI-COS API at {api_url}. ({error})")
     return None
@@ -30,6 +39,22 @@ def render_student_life_ui(api_url: str) -> None:
         '<div class="subtle">Forecast demand, create stable roommate pairs, schedule shared amenities, and reduce cafeteria waits.</div>',
         unsafe_allow_html=True,
     )
+    resource_catalog = [
+        "Mess forecast",
+        "Roommate matching",
+        "Amenity scheduler",
+        "Cafeteria queue",
+    ]
+    search_term = st.text_input("Quick Resource Finder", placeholder="Search a student-life tool…")
+    if search_term:
+        filtered_resources = [
+            item for item in resource_catalog if search_term.lower() in item.lower()
+        ]
+        if filtered_resources:
+            st.caption(f"{len(filtered_resources)} matching tools")
+            st.write(", ".join(filtered_resources))
+        else:
+            st.info("No matching tools found for that search.")
     st.divider()
     tabs = st.tabs(["Mess forecast", "Roommate matching", "Amenity scheduler", "Cafeteria queue"])
 

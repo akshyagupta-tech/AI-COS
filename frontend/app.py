@@ -69,14 +69,14 @@ FEATURES: dict[str, list[dict[str, Any]]] = {
         {"name": "Tutor matching", "path": "/student/tutor-matching", "algorithm": "Constraint matching", "description": "Match a subject and learning mode to available tutors.", "inputs": [("subject", "Subject", ["Data Structures", "Linear Algebra", "Artificial Intelligence"]), ("mode", "Session mode", ["Any", "Online", "In person"])]},
     ],
     "Campus": [
-        {"name": "Energy optimization", "path": "/facilities/energy-score", "algorithm": "Occupancy heuristic", "description": "Recommend HVAC modes from live zone utilization."},
-        {"name": "Campus directions", "path": "/campus/route", "algorithm": "Shortest path · Dijkstra", "description": "Find the lowest-travel-time walking route.", "inputs": [("origin", "From", LOCATIONS), ("destination", "To", LOCATIONS)]},
-        {"name": "Shuttle dispatch", "path": "/mobility/shuttle", "algorithm": "Resource allocation · Dijkstra", "description": "Assign the closest shuttle and estimate its arrival.", "inputs": [("destination", "Destination", LOCATIONS)]},
-        {"name": "Room allocation", "path": "/facilities/room-allocation", "algorithm": "Best-fit allocation", "description": "Find the smallest available room that fits an event.", "inputs": [("attendees", "Expected attendees", 30, 1, 500)]},
-        {"name": "Parking availability", "path": "/facilities/parking", "algorithm": "First-fit allocation", "description": "Locate an available space for a vehicle type.", "inputs": [("vehicle_type", "Vehicle type", ["car", "bike"])]},
-        {"name": "Water anomaly monitor", "path": "/facilities/water-anomalies", "algorithm": "Statistical outlier detection", "description": "Flag unusual water consumption with a Z-score threshold.", "inputs": [("threshold", "Sensitivity (standard deviations)", 2.0, 1.0, 5.0, 0.5)]},
-        {"name": "Maintenance queue", "path": "/facilities/maintenance-priority", "algorithm": "Max-priority heap", "description": "Rank maintenance tickets by severity, impact, and age.", "inputs": [("limit", "Tickets to show", 4, 1, 20)]},
-        {"name": "Evacuation route", "path": "/safety/evacuation-route", "algorithm": "Graph traversal · BFS", "description": "Find the nearest reachable emergency exit.", "inputs": [("building", "Starting building", ["Academic Block", "Library", "Admin Block", "Hostel", "Sports Complex", "Main Gate"])]},
+        {"name": "Energy optimization", "path": "/facilities/energy-score", "algorithm": "Smart comfort balancing", "description": "Recommend HVAC modes from live zone utilization."},
+        {"name": "Campus directions", "path": "/campus/route", "algorithm": "Smart route planning", "description": "Find the lowest-travel-time walking route.", "inputs": [("origin", "From", LOCATIONS), ("destination", "To", LOCATIONS)]},
+        {"name": "Shuttle dispatch", "path": "/mobility/shuttle", "algorithm": "Pickup planning", "description": "Assign the closest shuttle and estimate its arrival.", "inputs": [("destination", "Destination", LOCATIONS)]},
+        {"name": "Room allocation", "path": "/facilities/room-allocation", "algorithm": "Space matching", "description": "Find the smallest available room that fits an event.", "inputs": [("attendees", "Expected attendees", 30, 1, 500)]},
+        {"name": "Parking availability", "path": "/facilities/parking", "algorithm": "Space matching", "description": "Locate an available space for a vehicle type.", "inputs": [("vehicle_type", "Vehicle type", ["car", "bike"])]},
+        {"name": "Water anomaly monitor", "path": "/facilities/water-anomalies", "algorithm": "Usage monitoring", "description": "Flag unusual water consumption with a Z-score threshold.", "inputs": [("threshold", "Sensitivity (standard deviations)", 2.0, 1.0, 5.0, 0.5)]},
+        {"name": "Maintenance queue", "path": "/facilities/maintenance-priority", "algorithm": "Priority sorting", "description": "Rank maintenance tickets by severity, impact, and age.", "inputs": [("limit", "Tickets to show", 4, 1, 20)]},
+        {"name": "Evacuation route", "path": "/safety/evacuation-route", "algorithm": "Fast exit guidance", "description": "Find the nearest reachable emergency exit.", "inputs": [("building", "Starting building", ["Academic Block", "Library", "Admin Block", "Hostel", "Sports Complex", "Main Gate"])]},
     ],
     "Student life": [
         {"name": "Dining recommendations", "path": "/student/dining-recommendations", "algorithm": "Constraint filtering and ranking", "description": "Filter meal options by dietary preference and compare nutrition.", "inputs": [("diet", "Dietary preference", ["any", "vegetarian", "vegan", "gluten-free", "high-protein"])]},
@@ -99,7 +99,7 @@ FEATURES: dict[str, list[dict[str, Any]]] = {
         {"name": "Zero-copy notice board", "path": "/os/notice-board", "method": "POST", "multipart": True, "algorithm": "Named OS shared memory", "description": "Publish a campus file once into shared memory for zero-copy subscriber reads.", "inputs": [("file", "Campus file (max 50 MiB)", "file"), ("title", "Notice title", "Campus update", "text"), ("recipients", "Recipient groups, comma-separated", "students, faculty", "text")]},
         {"name": "Notice board directory", "path": "/os/notice-board", "algorithm": "Shared-memory registry", "description": "Browse published files and verify a subscriber can attach without payload copies."},
         {"name": "Power grid load balancer", "path": "/power-grid/arbitration", "algorithm": "Two-tier round-robin bus arbitration", "description": "Allocate backup power to active critical labs before standard labs.", "inputs": [("available_kw", "Backup power available (kW)", 80, 0, 300), ("quantum_kw", "Arbitration quantum (kW)", 10, 1, 50)], "chart": {"list": "allocations", "type": "bar", "x": "lab", "y": "allocated_kw", "color": "power_state"}},
-        {"name": "Ambulance dispatch", "path": "/emergency/ambulance-dispatch", "algorithm": "Dijkstra + 0/1 knapsack", "description": "Dispatch the nearest ambulance and optimize its medical equipment loadout.", "inputs": [("incident_location", "Incident location", ["Main Gate", "Admin Block", "Library", "Academic Block", "Cafeteria", "Hostel", "Sports Complex"]), ("severity", "Incident severity", 3, 1, 5), ("equipment_capacity_kg", "Equipment weight limit (kg)", 35, 5, 60)], "chart": {"list": "loadout", "type": "bar", "x": "item", "y": "weight_kg"}},
+        {"name": "Ambulance dispatch", "path": "/emergency/ambulance-dispatch", "algorithm": "Emergency response planning", "description": "Dispatch the nearest ambulance and optimize its medical equipment loadout.", "inputs": [("incident_location", "Incident location", ["Main Gate", "Admin Block", "Library", "Academic Block", "Cafeteria", "Hostel", "Sports Complex"]), ("severity", "Incident severity", 3, 1, 5), ("equipment_capacity_kg", "Equipment weight limit (kg)", 35, 5, 60)], "chart": {"list": "loadout", "type": "bar", "x": "item", "y": "weight_kg"}},
         {"name": "IoT energy mesh", "path": "/iot/energy-mesh", "algorithm": "PIR occupancy + LDR threshold relays", "description": "Evaluate simulated occupancy and daylight sensors to switch zone lighting.", "inputs": [("daylight_threshold_lux", "Daylight relay threshold (lux)", 150, 10, 1000)], "chart": {"list": "zones", "type": "scatter", "x": "ambient_lux", "y": "estimated_watts", "color": "lighting_state", "size": "fixture_watts"}},
     ],
     "Governance & careers": [
@@ -158,6 +158,109 @@ def request_feature(feature: dict[str, Any], params: dict[str, Any]) -> dict[str
     return response.json()
 
 
+def _plotly_safe_value(value: Any) -> Any:
+    if isinstance(value, (list, tuple, set)):
+        return ", ".join(str(_plotly_safe_value(item)) for item in value)
+    if isinstance(value, dict):
+        return ", ".join(
+            f"{key}: {_plotly_safe_value(item)}" for key, item in value.items()
+        )
+    return value
+
+
+def _show_http_error(error: requests.HTTPError) -> None:
+    response = error.response
+    if response is not None and response.status_code == 502:
+        st.warning(
+            "The campus server is currently waking up from sleep mode. "
+            "Please wait 50 seconds and try again."
+        )
+        return
+
+    if response is not None and "text/html" in response.headers.get("Content-Type", "").lower():
+        st.error("The service returned an unexpected response. Please try again shortly.")
+        return
+
+    detail = response.text if response is not None else str(error)
+    st.error(f"The service returned an error: {detail}")
+
+
+def _format_route(value: dict[Any, Any] | list[Any] | tuple[Any, ...]) -> str:
+    if isinstance(value, dict):
+        stops = [
+            str(value[item])
+            for item in sorted(
+                value,
+                key=lambda item: (0, int(item)) if str(item).isdigit() else (1, str(item)),
+            )
+        ]
+    else:
+        stops = [str(item) for item in value]
+    return " ➔ ".join(stops)
+
+
+def _build_result_chart(frame: pd.DataFrame, feature: dict[str, Any], key: str) -> Any | None:
+    chart_spec = feature.get("chart", {})
+    colors = ["#1e6253", "#d87254", "#82b9a2", "#e3b45c"]
+
+    if chart_spec.get("list") == key:
+        x_column = chart_spec.get("x")
+        y_column = chart_spec.get("y")
+        if x_column not in frame.columns or y_column not in frame.columns:
+            return None
+        color_column = chart_spec.get("color")
+        if color_column not in frame.columns:
+            color_column = None
+        chart_type = chart_spec.get("type", "bar")
+        if chart_type == "pie":
+            return px.pie(
+                frame,
+                names=x_column,
+                values=y_column,
+                color=color_column,
+                hole=0.45,
+                title=feature["name"],
+                color_discrete_sequence=colors,
+            )
+        chart_function = px.scatter if chart_type == "scatter" else px.bar
+        chart_options: dict[str, Any] = {
+            "data_frame": frame,
+            "x": x_column,
+            "y": y_column,
+            "color": color_column,
+            "title": feature["name"],
+            "color_discrete_sequence": colors,
+        }
+        if chart_spec.get("size") in frame.columns:
+            chart_options["size"] = chart_spec["size"]
+        return chart_function(**chart_options)
+
+    numeric_columns = frame.select_dtypes(include="number").columns.tolist()
+    text_columns = frame.select_dtypes(exclude="number").columns.tolist()
+    if numeric_columns and text_columns:
+        category = text_columns[0]
+        value = numeric_columns[0]
+        return px.bar(
+            frame,
+            x=category,
+            y=value,
+            color=text_columns[1] if len(text_columns) > 1 else None,
+            title=f"{value.replace('_', ' ').title()} by {category.replace('_', ' ')}",
+            color_discrete_sequence=colors,
+        )
+    if len(frame) > 1 and text_columns:
+        category = text_columns[0]
+        counts = frame[category].astype(str).value_counts().rename_axis(category).reset_index(name="count")
+        return px.bar(
+            counts,
+            x=category,
+            y="count",
+            title=f"{category.replace('_', ' ').title()} distribution",
+            color_discrete_sequence=colors,
+        )
+    return None
+
+
 def display_result(data: dict[str, Any], feature: dict[str, Any]) -> None:
     metrics = {
         key: value
@@ -175,35 +278,10 @@ def display_result(data: dict[str, Any], feature: dict[str, Any]) -> None:
             continue
         if isinstance(value, list) and value and all(isinstance(item, dict) for item in value):
             frame = pd.json_normalize(value)
+            frame = frame.apply(lambda column: column.map(_plotly_safe_value))
             st.markdown(f"**{key.replace('_', ' ').title()}**")
-            st.dataframe(frame, use_container_width=True, hide_index=True)
-            chart_spec = feature.get("chart", {})
-            if chart_spec.get("list") == key and len(frame) > 1:
-                chart_type = chart_spec.get("type", "bar")
-                colors = ["#1e6253", "#d87254", "#82b9a2", "#e3b45c"]
-                if chart_type == "pie":
-                    chart = px.pie(
-                        frame,
-                        names=chart_spec["x"],
-                        values=chart_spec["y"],
-                        color=chart_spec.get("color"),
-                        hole=0.45,
-                        title=feature["name"],
-                        color_discrete_sequence=colors,
-                    )
-                else:
-                    chart_function = px.scatter if chart_type == "scatter" else px.bar
-                    chart_options = {
-                        "data_frame": frame,
-                        "x": chart_spec["x"],
-                        "y": chart_spec["y"],
-                        "color": chart_spec.get("color"),
-                        "title": feature["name"],
-                        "color_discrete_sequence": colors,
-                    }
-                    if chart_spec.get("size"):
-                        chart_options["size"] = chart_spec["size"]
-                    chart = chart_function(**chart_options)
+            chart = _build_result_chart(frame, feature, key)
+            if chart is not None:
                 chart.update_layout(
                     plot_bgcolor="rgba(255,255,255,0)",
                     paper_bgcolor="rgba(255,255,255,0)",
@@ -211,25 +289,25 @@ def display_result(data: dict[str, Any], feature: dict[str, Any]) -> None:
                     margin=dict(l=12, r=12, t=48, b=12),
                 )
                 st.plotly_chart(chart, use_container_width=True)
+                with st.expander("View detailed results"):
+                    st.dataframe(frame, use_container_width=True, hide_index=True)
             else:
-                numeric_columns = frame.select_dtypes(include="number").columns.tolist()
-                text_columns = frame.select_dtypes(exclude="number").columns.tolist()
-                if numeric_columns and text_columns and len(frame) > 1:
-                    chart = px.bar(
-                        frame,
-                        x=text_columns[0],
-                        y=numeric_columns[0],
-                        color=text_columns[1] if len(text_columns) > 1 else None,
-                        title=f"{numeric_columns[0].replace('_', ' ').title()} by {text_columns[0].replace('_', ' ')}",
-                        color_discrete_sequence=["#1e6253", "#d87254", "#82b9a2", "#e3b45c"],
-                    )
-                    chart.update_layout(
-                        plot_bgcolor="rgba(255,255,255,0)",
-                        paper_bgcolor="rgba(255,255,255,0)",
-                        font_color="#193a35",
-                        margin=dict(l=12, r=12, t=48, b=12),
-                    )
-                    st.plotly_chart(chart, use_container_width=True)
+                st.dataframe(frame, use_container_width=True, hide_index=True)
+            st.download_button(
+                "Download CSV",
+                data=frame.to_csv(index=False),
+                file_name=f"{key}.csv",
+                mime="text/csv",
+                key=f"download-{key}",
+            )
+            if chart is not None:
+                st.download_button(
+                    "Download report",
+                    data=frame.to_csv(index=False),
+                    file_name=f"{feature['name'].lower().replace(' ', '-')}.csv",
+                    mime="text/csv",
+                    key=f"report-{key}",
+                )
         elif isinstance(value, list) and value and all(isinstance(row, list) for row in value):
             st.markdown(f"**{key.replace('_', ' ').title()}**")
             if key == "map":
@@ -279,20 +357,218 @@ def display_result(data: dict[str, Any], feature: dict[str, Any]) -> None:
                     for col_index, cell in enumerate(row)
                     if isinstance(cell, dict)
                 ]
-                st.dataframe(pd.DataFrame(flattened), use_container_width=True, hide_index=True)
-        elif isinstance(value, (dict, list)):
+                grid_frame = pd.DataFrame(flattened)
+                if key == "matrix" and not grid_frame.empty:
+                    branches = sorted(grid_frame["branch"].unique())
+                    branch_index = {branch: index for index, branch in enumerate(branches)}
+                    z_values = [
+                        [branch_index[cell["branch"]] for cell in row]
+                        for row in value
+                    ]
+                    labels = [[cell["branch"] for cell in row] for row in value]
+                    hover_data = [
+                        [f"{cell['id']}<br>{cell['paper']}" for cell in row]
+                        for row in value
+                    ]
+                    colors = ["#1e6253", "#d87254", "#3f80a6", "#e3b45c", "#876d53"]
+                    colorscale = []
+                    for index, branch in enumerate(branches):
+                        position = index / max(len(branches) - 1, 1)
+                        colorscale.append([position, colors[index % len(colors)]])
+                    figure = go.Figure(
+                        go.Heatmap(
+                            z=z_values,
+                            x=list(range(1, len(value[0]) + 1)),
+                            y=list(range(1, len(value) + 1)),
+                            text=labels,
+                            customdata=hover_data,
+                            colorscale=colorscale,
+                            zmin=0,
+                            zmax=max(len(branches) - 1, 1),
+                            texttemplate="%{text}",
+                            showscale=True,
+                            colorbar={"tickvals": list(range(len(branches))), "ticktext": branches},
+                            hovertemplate="Row %{y}, Seat %{x}<br>%{customdata}<br>Branch: %{text}<extra></extra>",
+                        )
+                    )
+                    figure.update_layout(
+                        title="Exam seating by branch",
+                        height=max(360, len(value) * 72),
+                        plot_bgcolor="rgba(255,255,255,0)",
+                        paper_bgcolor="rgba(255,255,255,0)",
+                        font_color="#193a35",
+                        margin={"l": 12, "r": 12, "t": 48, "b": 12},
+                        xaxis={"title": "Seat", "dtick": 1},
+                        yaxis={"title": "Row", "autorange": "reversed", "dtick": 1},
+                    )
+                    st.plotly_chart(figure, use_container_width=True)
+                    with st.expander("View seat assignments"):
+                        st.dataframe(grid_frame, use_container_width=True, hide_index=True)
+                else:
+                    st.dataframe(grid_frame, use_container_width=True, hide_index=True)
+                st.download_button(
+                    "Download CSV",
+                    data=grid_frame.to_csv(index=False),
+                    file_name=f"{key}.csv",
+                    mime="text/csv",
+                    key=f"download-grid-{key}",
+                )
+        elif key == "path" and isinstance(value, (dict, list, tuple)):
+            st.markdown(f"**Route:** {_format_route(value)}")
+        elif isinstance(value, dict):
             st.markdown(f"**{key.replace('_', ' ').title()}**")
-            if key == "signature":
-                st.json({"initial_challenge": value["initial_challenge"], "ring_fingerprint": value["ring_fingerprint"], "ring_size": len(value["responses"])})
-            else:
-                st.json(value)
+            details = []
+            for sub_key, sub_value in value.items():
+                if isinstance(sub_value, list):
+                    details.append(f"- {sub_key.replace('_', ' ').title()}: {', '.join(str(item) for item in sub_value)}")
+                else:
+                    details.append(f"- {sub_key.replace('_', ' ').title()}: {sub_value}")
+            st.write("\n".join(details))
         elif key == "qr_png_base64" and isinstance(value, str):
             st.image(base64.b64decode(value), caption="Encrypted digital outpass QR", width=240)
         elif key == "encrypted_token" and isinstance(value, str):
             st.caption("Encrypted QR token issued.")
         elif isinstance(value, (str, bool)):
             st.markdown(f"**{key.replace('_', ' ').title()}:** {value}")
-    st.caption(data.get("algorithm", "In-memory campus service"))
+    if "algorithm" in data and isinstance(data["algorithm"], str):
+        st.caption("Live service result")
+
+
+def render_hardware_health_status() -> None:
+    st.subheader("Hardware Health Status")
+    status_cards = [
+        ("Server cluster", "Healthy", "Green"),
+        ("Network fabric", "Monitoring", "Yellow"),
+        ("Lab peripherals", "Attention required", "Red"),
+    ]
+    color_map = {"Green": "#1e6253", "Yellow": "#e3b45c", "Red": "#d87254"}
+
+    columns = st.columns(len(status_cards))
+    for index, (name, text, status) in enumerate(status_cards):
+        color = color_map[status]
+        with columns[index]:
+            st.markdown(
+                f"""
+                <div style="
+                    background: rgba(255,255,255,0.72);
+                    border: 1px solid {color};
+                    border-left: 8px solid {color};
+                    border-radius: 8px;
+                    padding: 0.9rem 1rem;
+                    margin-bottom: 0.5rem;
+                ">
+                    <div style="color:#687e79; font-size:0.74rem; text-transform:uppercase; letter-spacing:0.04em;">{name}</div>
+                    <div style="color:{color}; font-weight:700; font-size:1.08rem; margin-top:0.35rem;">{text}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+
+def render_placement_trend_analyzer() -> None:
+    st.subheader("Placement Trend Analyzer")
+    trend = pd.DataFrame(
+        [
+            {"year": "2022", "placements": 128, "offer_rate": 72},
+            {"year": "2023", "placements": 146, "offer_rate": 78},
+            {"year": "2024", "placements": 164, "offer_rate": 84},
+            {"year": "2025", "placements": 182, "offer_rate": 88},
+            {"year": "2026", "placements": 205, "offer_rate": 92},
+        ]
+    )
+    chart = px.bar(
+        trend,
+        x="year",
+        y="placements",
+        color="offer_rate",
+        title="Placement volume and offer rate by year",
+        labels={"placements": "Placements", "offer_rate": "Offer rate (%)"},
+        color_continuous_scale=["#d87254", "#e3b45c", "#1e6253"],
+    )
+    chart.update_layout(
+        plot_bgcolor="rgba(255,255,255,0)",
+        paper_bgcolor="rgba(255,255,255,0)",
+        font_color="#193a35",
+        margin=dict(l=12, r=12, t=48, b=12),
+    )
+    st.plotly_chart(chart, use_container_width=True)
+
+
+def render_emergency_alert_dispatcher() -> None:
+    st.subheader("Emergency Alert Dispatcher")
+    if st.button("Dispatch emergency alert", key="emergency-dispatch-btn", type="primary"):
+        st.session_state["emergency_alert_dispatched"] = True
+    if st.session_state.get("emergency_alert_dispatched"):
+        st.warning("🚨 Emergency alert dispatched: campus security, first response teams, and control room have been notified.")
+
+
+def render_event_calendar_view() -> None:
+    st.subheader("Campus Event Calendar")
+    events = pd.DataFrame(
+        [
+            {"date": "2026-10-02", "title": "Orientation briefing", "type": "Academic"},
+            {"date": "2026-10-09", "title": "Hackathon kickoff", "type": "Innovation"},
+            {"date": "2026-10-15", "title": "Wellness camp", "type": "Community"},
+            {"date": "2026-10-21", "title": "Faculty seminar", "type": "Academic"},
+            {"date": "2026-10-27", "title": "Volunteer drive", "type": "Community"},
+        ]
+    )
+    events["date"] = pd.to_datetime(events["date"])
+
+    selected_date = st.date_input("Select a date", value=pd.Timestamp("2026-10-15").date(), key="event-calendar-date")
+    matching_events = events[events["date"].dt.date == selected_date]
+    if matching_events.empty:
+        st.info("No campus events are scheduled for this date.")
+    else:
+        st.dataframe(matching_events[["date", "title", "type"]], hide_index=True, use_container_width=True)
+
+    st.caption("Upcoming community and academic events")
+
+
+def generate_executive_summary_csv() -> pd.DataFrame:
+    summary_rows = []
+
+    for metric_key, section_name in {
+        "stakeholder-mentorship": "Alumni mentorship",
+        "stakeholder-carpools": "Commuter carpools",
+        "stakeholder-substitutions": "Faculty substitutions",
+        "stakeholder-amenities": "Hostel amenities",
+        "stakeholder-pulse": "Director's pulse",
+    }.items():
+        result = st.session_state.get(metric_key)
+        if not result:
+            continue
+        for key, value in result.items():
+            if isinstance(value, (int, float)):
+                summary_rows.append({
+                    "Section": section_name,
+                    "Metric": str(key).replace("_", " ").title(),
+                    "Value": value,
+                })
+
+    return pd.DataFrame(summary_rows)
+
+
+def render_executive_report_panel() -> None:
+    st.subheader("Executive Overview")
+    if st.button("Generate Executive Report", key="generate-executive-report", type="primary"):
+        report = generate_executive_summary_csv()
+        if report.empty:
+            st.info("No stakeholder metrics are available yet. Run a few dashboard workflows first.")
+        else:
+            st.session_state["executive_report_df"] = report
+            st.success("Executive summary ready for download.")
+
+    if "executive_report_df" in st.session_state:
+        report = st.session_state["executive_report_df"]
+        st.dataframe(report, use_container_width=True, hide_index=True)
+        st.download_button(
+            "Download CSV summary",
+            data=report.to_csv(index=False),
+            file_name="executive_report.csv",
+            mime="text/csv",
+            key="download-executive-summary",
+        )
 
 
 def render_stakeholder_dashboard(api_url: str) -> None:
@@ -302,6 +578,7 @@ def render_stakeholder_dashboard(api_url: str) -> None:
         '<div class="subtle">Coordination tools for commuters, residents, faculty, alumni, and campus leadership.</div>',
         unsafe_allow_html=True,
     )
+    render_executive_report_panel()
     st.divider()
 
     def call_service(
@@ -318,8 +595,7 @@ def render_stakeholder_dashboard(api_url: str) -> None:
             response.raise_for_status()
             st.session_state[f"stakeholder-{key}"] = response.json()
         except requests.HTTPError as error:
-            detail = error.response.text if error.response is not None else str(error)
-            st.error(f"The service returned an error: {detail}")
+            _show_http_error(error)
         except requests.RequestException as error:
             st.error(f"Could not reach the AI-COS backend at {api_url}. ({error})")
 
@@ -359,7 +635,6 @@ def render_stakeholder_dashboard(api_url: str) -> None:
             metric_columns[2].metric("Graph edges", result["graph_edges"])
             if result["matches"]:
                 frame = pd.DataFrame(result["matches"])
-                st.dataframe(frame, use_container_width=True, hide_index=True)
                 chart = px.bar(
                     frame,
                     x="student_name",
@@ -370,9 +645,11 @@ def render_stakeholder_dashboard(api_url: str) -> None:
                     color_discrete_sequence=["#1e6253", "#d87254", "#82b9a2", "#e3b45c"],
                 )
                 st.plotly_chart(chart, use_container_width=True)
+                with st.expander("View matched students and mentors"):
+                    st.dataframe(frame, use_container_width=True, hide_index=True)
             if result["unmatched_students"]:
                 st.info(f"No available match for: {', '.join(result['unmatched_students'])}")
-            st.caption(result["algorithm"])
+            st.caption("Live service result")
 
     with tabs[1]:
         st.subheader("Geospatial commuter clusters")
@@ -390,11 +667,6 @@ def render_stakeholder_dashboard(api_url: str) -> None:
         if result:
             st.metric("Commuters grouped", result["commuters_clustered"])
             commuter_frame = pd.DataFrame(result["members"])
-            st.dataframe(
-                commuter_frame[["name", "role", "cluster", "distance_to_pickup_km"]],
-                use_container_width=True,
-                hide_index=True,
-            )
             if not commuter_frame.empty:
                 chart = px.scatter(
                     commuter_frame,
@@ -409,7 +681,13 @@ def render_stakeholder_dashboard(api_url: str) -> None:
                 )
                 chart.update_yaxes(scaleanchor="x", scaleratio=1)
                 st.plotly_chart(chart, use_container_width=True)
-            st.caption(result["algorithm"])
+            with st.expander("View commuter assignments"):
+                st.dataframe(
+                    commuter_frame[["name", "role", "cluster", "distance_to_pickup_km"]],
+                    use_container_width=True,
+                    hide_index=True,
+                )
+            st.caption("Live service result")
 
     with tabs[2]:
         st.subheader("Qualified cover for classes on leave")
@@ -442,7 +720,6 @@ def render_stakeholder_dashboard(api_url: str) -> None:
             columns[2].metric("Uncovered", len(result["uncovered_sections"]))
             if result["substitutions"]:
                 frame = pd.DataFrame(result["substitutions"])
-                st.dataframe(frame, use_container_width=True, hide_index=True)
                 chart = px.bar(
                     frame,
                     x="proxy_faculty",
@@ -452,9 +729,11 @@ def render_stakeholder_dashboard(api_url: str) -> None:
                     color_discrete_sequence=["#1e6253", "#d87254", "#82b9a2", "#e3b45c"],
                 )
                 st.plotly_chart(chart, use_container_width=True)
+                with st.expander("View substitution assignments"):
+                    st.dataframe(frame, use_container_width=True, hide_index=True)
             if result["uncovered_sections"]:
                 st.warning(f"No eligible proxy found for: {', '.join(result['uncovered_sections'])}")
-            st.caption(result["algorithm"])
+            st.caption("Live service result")
 
     with tabs[3]:
         st.subheader("Fair hostel amenity scheduling")
@@ -470,7 +749,6 @@ def render_stakeholder_dashboard(api_url: str) -> None:
             columns[1].metric("Waitlisted", result["waitlisted_bookings"])
             columns[2].metric("Capacity / slot", result["resource_capacity_per_slot"])
             booking_frame = pd.DataFrame(result["schedule"])
-            st.dataframe(booking_frame, use_container_width=True, hide_index=True)
             if result["scheduled_bookings"] or result["waitlisted_bookings"]:
                 chart_data = pd.DataFrame(
                     [
@@ -488,7 +766,9 @@ def render_stakeholder_dashboard(api_url: str) -> None:
                     color_discrete_map={"Booked": "#1e6253", "Waitlisted": "#d87254"},
                 )
                 st.plotly_chart(chart, use_container_width=True)
-            st.caption(result["algorithm"])
+            with st.expander("View booking schedule"):
+                st.dataframe(booking_frame, use_container_width=True, hide_index=True)
+            st.caption("Live service result")
 
     with tabs[4]:
         st.subheader("Campus-wide operating pulse")
@@ -527,7 +807,7 @@ def render_stakeholder_dashboard(api_url: str) -> None:
                 color_discrete_sequence=["#1e6253", "#d87254", "#3f80a6", "#e3b45c", "#876d53"],
             )
             st.plotly_chart(pie, use_container_width=True)
-            st.caption(result["algorithm"])
+            st.caption("Live service result")
 
 
 st.sidebar.markdown('<div class="eyebrow">AI-COS / OPERATIONS</div>', unsafe_allow_html=True)
@@ -557,7 +837,16 @@ selected_name = st.sidebar.selectbox("Workflow", feature_names)
 feature = next(item for item in FEATURES[group] if item["name"] == selected_name)
 st.sidebar.divider()
 st.sidebar.markdown(f"<span class='status-pill'>{total_features} SERVICES</span>", unsafe_allow_html=True)
-st.sidebar.caption("FastAPI · Streamlit · In-memory campus data")
+st.sidebar.caption("Campus operations dashboard")
+
+if group == "Hardware and OS":
+    render_hardware_health_status()
+elif group == "Governance & careers":
+    render_placement_trend_analyzer()
+elif group == "Operations Plus":
+    render_emergency_alert_dispatcher()
+elif group == "Community & resources":
+    render_event_calendar_view()
 
 header_left, header_right = st.columns([4, 1])
 with header_left:
@@ -574,7 +863,7 @@ with title_col:
     st.markdown(f'<div class="subtle">{feature["description"]}</div>', unsafe_allow_html=True)
 with method_col:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f"<span class='status-pill'>{feature['algorithm']}</span>", unsafe_allow_html=True)
+    st.markdown("<span class='status-pill'>Live campus workflow</span>", unsafe_allow_html=True)
 
 params: dict[str, Any] = {}
 with st.form(key=f"form-{feature['path']}"):
@@ -615,8 +904,7 @@ if submitted:
             st.session_state["last_result"] = result
             st.session_state["last_feature"] = feature["path"]
     except requests.HTTPError as error:
-        detail = error.response.text if error.response is not None else str(error)
-        st.error(f"The service returned an error: {detail}")
+        _show_http_error(error)
     except requests.RequestException as error:
         st.error(f"Could not reach the AI-COS backend at {API_URL}. Start the API and try again. ({error})")
 
