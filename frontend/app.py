@@ -119,6 +119,7 @@ FEATURES: dict[str, list[dict[str, Any]]] = {
         {"name": "Scholarship matcher", "path": "/financial-aid/scholarship-matches", "algorithm": "Rule-based eligibility engine", "description": "Compare a student profile with seeded grant requirements.", "inputs": [("student_id", "Student profile", ["STU-401", "STU-402", "STU-403", "STU-404"])], "chart": {"list": "matches", "type": "bar", "x": "scholarship", "y": "requirements_met", "color": "eligible"}},
     ],
     "Community & resources": [
+        {"name": "Mentorship & Guidance", "path": "/mentorship-guidance", "ui_only": True, "description": "Connect with alumni, faculty, and experienced mentors for practical academic and career guidance."},
         {"name": "Roommate compatibility", "path": "/residential/roommate-matches", "algorithm": "Gale-Shapley stable matching", "description": "Pair students using preference/profile vectors for study, sleep, and living habits.", "chart": {"list": "pairings", "type": "bar", "x": "student_a", "y": "compatibility_pct"}},
         {"name": "Student council election", "path": "/elections/student-council/vote", "method": "POST", "algorithm": "Anonymous SHA-256 vote chain", "description": "Cast one anonymous vote using a one-time token; each ballot is hash-chained.", "inputs": [("voter_token", "One-time voter token", "student-token-501", "text"), ("choice", "Campus initiative", ["Quiet study spaces", "Campus shuttle frequency", "Club equipment fund"])]},
         {"name": "Election results", "path": "/elections/student-council/results", "algorithm": "Hash-chain audit + vote aggregation", "description": "Review anonymous tallies and verify the ballot chain.", "chart": {"list": "results", "type": "pie", "x": "option", "y": "votes"}},
@@ -183,6 +184,89 @@ def _show_http_error(error: requests.HTTPError) -> None:
 
     detail = response.text if response is not None else str(error)
     st.error(f"The service returned an error: {detail}")
+
+
+def render_mentorship_guidance_ui() -> None:
+    mentor_groups = [
+        {
+            "category": "Alumni",
+            "action": "Book a Chat",
+            "profiles": [
+                {
+                    "name": "Aarav Mehta",
+                    "expertise": "Product strategy, startups",
+                    "organization": "Northstar Labs",
+                    "experience": "8 years",
+                },
+                {
+                    "name": "Sana Iqbal",
+                    "expertise": "Cloud architecture, distributed systems",
+                    "organization": "Vertex Cloud",
+                    "experience": "6 years",
+                },
+            ],
+        },
+        {
+            "category": "Current Faculty",
+            "action": "Request Guidance",
+            "profiles": [
+                {
+                    "name": "Dr. Neha Kapoor",
+                    "expertise": "Artificial intelligence, research methods",
+                    "organization": "Computer Science",
+                    "experience": "12 years",
+                },
+                {
+                    "name": "Prof. Rohan Sethi",
+                    "expertise": "Embedded systems, robotics",
+                    "organization": "Electronics and Communication",
+                    "experience": "10 years",
+                },
+            ],
+        },
+        {
+            "category": "Past Mentors",
+            "action": "Book a Chat",
+            "profiles": [
+                {
+                    "name": "Mira Thomas",
+                    "expertise": "UX research, portfolio reviews",
+                    "organization": "Independent Design Consultant",
+                    "experience": "9 years",
+                },
+                {
+                    "name": "Kabir Rao",
+                    "expertise": "Data engineering, interview preparation",
+                    "organization": "Former Campus Mentor",
+                    "experience": "7 years",
+                },
+            ],
+        },
+    ]
+
+    st.markdown('<div class="eyebrow">MENTOR NETWORK</div>', unsafe_allow_html=True)
+    st.subheader("Find a mentor for your next step")
+    st.markdown(
+        '<div class="subtle">Browse experienced guides across campus and industry.</div>',
+        unsafe_allow_html=True,
+    )
+    category_columns = st.columns(3, gap="large")
+
+    for column, group in zip(category_columns, mentor_groups):
+        with column:
+            st.markdown(f"### {group['category']}")
+            for index, profile in enumerate(group["profiles"]):
+                with st.container(border=True):
+                    st.markdown(f"#### {profile['name']}")
+                    st.markdown(f"**Expertise**  \n{profile['expertise']}")
+                    st.markdown(f"**Department / Company**  \n{profile['organization']}")
+                    st.caption(f"{profile['experience']} experience")
+                    if st.button(
+                        group["action"],
+                        key=f"mentor-request-{group['category'].lower().replace(' ', '-')}-{index}",
+                        use_container_width=True,
+                    ):
+                        st.success("Interaction request sent successfully to the mentor!")
 
 
 def _format_route(value: dict[Any, Any] | list[Any] | tuple[Any, ...]) -> str:
@@ -864,6 +948,10 @@ with title_col:
 with method_col:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("<span class='status-pill'>Live campus workflow</span>", unsafe_allow_html=True)
+
+if feature.get("ui_only"):
+    render_mentorship_guidance_ui()
+    st.stop()
 
 params: dict[str, Any] = {}
 with st.form(key=f"form-{feature['path']}"):
